@@ -1,0 +1,309 @@
+kibot:
+  version: 1
+# DISABLED: Boardview DISABLED: GenCAD
+# DISABLED: HPGL (Hewlett & Packard Graphics Language)
+# DISABLED: KiBoM (KiCad Bill of Materials)
+# DISABLED: PDF (Portable Document Format):
+# MAYBE: PCB Print
+# MAYBE: PcbDraw - Beautiful 2D PCB render
+# DISABLED: PDF PCB Print (Portable Document Format)
+# DISABLED: PDF Schematic Print (Portable Document Format)
+# MAYBE: PDF joiner
+# DISABLED: Pick & place
+# DISABLED: PS (Postscript)
+# DISABLED: QR_Lib
+# DISABLED: Schematic with variant generator
+# MAYBE: SVG (Scalable Vector Graphics)
+# DISABLED: SVG PCB Print (Scalable Vector Graphics)
+# DISABLED: SVG Schematic Print
+#
+preflight:
+  # annotate_pcb section: MAYBE LATER
+  annotate_power: true
+  check_zone_fills: true
+  erc_warnings: false
+  fill_zones: true
+  ignore_unconnected: false # true only if circuit is not finished
+  run_drc: true
+  run_erc: true
+  # ADD PCB Replace
+  update_qr: false # Check Later
+  update_xml: true # Not needed cause of 'bom' module
+outputs:
+  - name: "Datasheets"
+    comment: "Downloads the datasheets for the project"
+    type: "download_datasheets"
+    dir: "Datasheets"
+    options:
+      field: "Datasheet"
+      link_repeated: true
+      output: "${VALUE}.pdf"
+      repeated: false
+  - name: "gerber_drill"
+    comment: "Create Gerber drills files"
+    type: "gerb_drill"
+    dir: "Gerber/drill"
+    options:
+      map:
+        output: "%f-%i%I%v.%x"
+        type: "pdf"
+      output: "%f-%i%I%v.%x"
+      use_aux_axis_as_origin: false
+  - name: "gerber_plot"
+    comment: "Create Gerber plot files"
+    type: "gerber"
+    dir: "Gerber/plot"
+    options:
+      create_gerber_job_file: true
+      exclude_edge_layer: true
+      exclude_pads_from_silkscreen: false
+      force_plot_invisible_refs_vals: false
+      gerber_job_file: "%f-%i%I%v.%x"
+      gerber_precision: 4.6
+      line_width: 0.1
+      output: "%f-%i%I%v.%x"
+      plot_footprint_refs: true
+      plot_footprint_values: true
+      plot_sheet_reference: false
+      subtract_mask_from_silk: false
+    layers: # Important layers: (all)
+      - copper
+      - Edge.Cuts
+      - F.SilkS
+      - B.SilkS
+      - F.Mask
+      - B.Mask
+      - F.Paste
+      - F.Adhes
+      - F.Fab
+      - F.CrtYd
+      - Dwgs.User
+  - name: "gerber_drill_zip"
+    comment: "Create Gerber drills files"
+    type: "gerb_drill"
+    dir: "."
+    options:
+      map:
+        output: "%f-%i%I%v.%x"
+        type: "pdf"
+      output: "%f-%i%I%v.%x"
+      use_aux_axis_as_origin: false
+  - name: "gerber_plot_zip"
+    comment: "Create Gerber plot files"
+    type: "gerber"
+    dir: "."
+    options:
+      create_gerber_job_file: true
+      exclude_edge_layer: true
+      exclude_pads_from_silkscreen: false
+      force_plot_invisible_refs_vals: false
+      gerber_job_file: "%f-%i%I%v.%x"
+      gerber_precision: 4.6
+      line_width: 0.1
+      output: "%f-%i%I%v.%x"
+      plot_footprint_refs: true
+      plot_footprint_values: true
+      plot_sheet_reference: false
+      subtract_mask_from_silk: false
+    layers: # Important layers: (all)
+      - copper
+      - Edge.Cuts
+      - F.SilkS
+      - B.SilkS
+      - F.Mask
+      - B.Mask
+      - F.Paste
+      - F.Adhes
+      - F.Fab
+      - F.CrtYd
+      - Dwgs.User
+  - name: "Compress"
+    comment: "Compress Gerber files in a single archive"
+    type: "compress"
+    dir: "Gerber"
+    options:
+      compression: "auto"
+      files:
+        - filter: ".*[.](gbr|gbrjob|pdf)"
+      format: "ZIP"
+      move_files: false
+  - name: "bom"
+    comment: "Generate the bom in Export"
+    type: "bom"
+    dir: "Export/bom"
+    options:
+      angle_positive: true
+      bottom_negative_x: false
+      int_qtys: true
+      format: "CSV"
+      group_connectors: true
+      ignore_dnf: true
+      normalize_values: true # IMPORTANT: Warning
+      number: 1 # IMPORTANT: Number of board
+      output: "%f-%i%I%v.%x"
+      units: "millimeters"
+      html:
+        logo: false # IMPORTANT: PNG logo
+        style: "modern-blue"
+        title: "Bill of Materials"
+      csv:
+        separator: ","
+      xlsx:
+        col_colors: true
+        kicost: false # IMPORTANT: Maybe true
+        # [string|boolean=''] PNG file to use as logo, use false to remove
+        logo: false # IMPORTANT: PNG logo
+        logo_scale: 2
+        max_col_width: 60
+        specs: false # IMPORTANT: Kicost
+        style: "modern-blue"
+        title: "Bill of Materials"
+  - name: "ibom"
+    comment: "Generate the HTML ibom"
+    type: "ibom"
+    dir: "Export/ibom"
+    options:
+      board_rotation: 0
+      bom_view: "left-right"
+      checkboxes: "Sourced,Placed"
+      dark_mode: true # Important: Dark mode
+      hide_pads: false
+      hide_silkscreen: false
+      highlight_pin1: false
+      include_nets: false
+      include_tracks: false
+      layer_view: "FB"
+      name_format: "%f-%r-%D"
+      no_redraw_on_drag: false
+      normalize_field_case: false
+      output: "%f-%i%I%v.%x"
+      show_fabrication: false
+      show_fields: ""
+      sort_order: "C,R,L,D,U,Y,X,F,SW,A,~,HS,CNN,J,P,NT,MH"
+  # KiCost (KiCad Cost calculator):
+  # - name: "kicost"
+  #  comment: "Generates a spreadsheet containing components costs."
+  #  type: "kicost"
+  #  dir: "Export/cost"
+  #  options:
+  #    currency: EUR # Important: Currency
+  #    no_collapse: false
+  #    number: 1 # Important: Number of board
+  #    show_cat_url: false
+  - name: "DXF"
+    comment: "Exports the PCB to 2D mechanical EDA tools (like AutoCAD)."
+    type: "dxf"
+    dir: "Export/dxf"
+    options:
+      metric_units: false # IMPORTANT: WHY ?!?!?
+      output: "%f-%i%I%v.%x"
+      plot_footprint_refs: true
+      plot_footprint_values: true
+      plot_sheet_reference: false
+      polygon_mode: true
+      tent_vias: true
+    layers: # Important layers: (all)
+      - copper
+      - Edge.Cuts
+      - F.SilkS
+      - B.SilkS
+      - F.Mask
+      - B.Mask
+      - F.Paste
+      - F.Adhes
+      - F.Fab
+      - F.CrtYd
+      - Dwgs.User
+  - name: "Drill"
+    comment: "Export drills (excellon)"
+    type: "excellon"
+    dir: "Export/drill"
+    options:
+      left_digits: 0
+      map:
+        output: "%f-%i%I%v.%x"
+        type: "pdf"
+      metric_units: true
+      mirror_y_axis: false
+      output: "%f-%i%I%v.%x"
+      route_mode_for_oval_holes: true
+      zeros_format: "DECIMAL_FORMAT"
+  - name: "schematic"
+    comment: "Export Schematic image"
+    type: "svg_sch_print"
+    dir: "View/schematics"
+  # PcbDraw
+  - name: "board_top"
+    comment: "Export Top layer view image"
+    type: "pcbdraw"
+    dir: "View/pcb"
+    options:
+      format: jpg
+      dpi: 900
+  - name: "board_bottom"
+    comment: "Export Bottom layer view image"
+    type: "pcbdraw"
+    dir: "View/pcb"
+    options:
+      format: jpg
+      dpi: 900
+      bottom: true
+  # 3D render of the PCB:
+  - name: "render_3d_top"
+    comment: "Export the image generated by KiCad's 3D viewer."
+    type: "render_3d"
+    dir: "View/3D"
+    options:
+      zoom: 3
+      ray_tracing: true
+  - name: "render_3d_bottom"
+    comment: "Export the image generated by KiCad's 3D viewer."
+    type: "render_3d"
+    dir: "View/3D"
+    options:
+      zoom: 3
+      view: "bottom"
+      ray_tracing: true
+  - name: "render_3D_tilted"
+    comment: "Export the image generated by KiCad's 3D viewer."
+    type: "render_3d"
+    dir: "View/3D"
+    options:
+      zoom: 4
+      rotate_x: 3
+      rotate_z: 3
+      ray_tracing: true
+      output: "%f-tilted-1.%x"
+  - name: "render_3D_tilted_2"
+    comment: "Export the image generated by KiCad's 3D viewer."
+    type: "render_3d"
+    dir: "View/3D"
+    options:
+      zoom: 4
+      rotate_x: 3
+      rotate_z: -3
+      ray_tracing: true
+      output: "%f-tilted-2.%x"
+  # STEP
+  - name: "step"
+    comment: "Exports the PCB as a 3D model."
+    type: "step"
+    dir: "View/step"
+    options:
+      # [boolean=true] Downloads missing 3D models from KiCad git. Only applies to models in KISYS3DMOD
+      download: true
+      kicad_3d_url: "https://gitlab.com/kicad/libraries/kicad-packages3D/-/raw/master/"
+      metric_units: true
+  # Design report:
+  # Mainly oriented to be sent to the manufacturer or check PCB details.
+  - name: "report"
+    comment: "Generates a report about the design."
+    type: "report"
+    dir: "Export/report"
+    options:
+      convert_from: "markdown"
+      convert_to: "pdf"
+      converted_output: "%f-%i%I%v.%x"
+      do_convert: false
+      output: "%f-%i%I%v.%x"
+      template: "full"
